@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src='https://cdn.plot.ly/plotly-2.8.3.min.js'></script>
+    </head>
+    <body>
+        <form id = "parameters">
+            <p> 
+                Network type:
+                <label>
+                    <input type="radio" name="network" value="Erdos" checked> Erdos-Renyi
+                </label>
+                <label>
+                    <input type="radio" name="network" value="Core-Periphery"> Core-Periphery
+                </label>
+        
+            </p>
+            <p> Degree <input type="number" name="degree" min="1" max="15" step="0.25"></p>
+            <p> Number of banks <input type="number" name="bankNum" min="1" max="1000"></p>
+            <p style="display:none"> Percentage of banks in core <input type="number" name="corePercent" min="0" max="1" step="0.1"></p>
+            <p style="display:none"> The ratio between the core-degree and periphery-degree <input type="number" name="degreeRatio" min="1" max="5" step="0.25"></p>
+            <button type="submit"> Generate Network</button>
+        </form>
+        <button id="shock"> Shock random bank </button>
+        <button id="coreShock"  style="display:none"> Shock random bank in core </button>
+        <p id="shockedNode" style="display: inline"></p>
+        <form id="searchBar" style="display:none">
+            Enter node number:
+            <input name="nodeSearch" type="number" min="0" step="1">
+            <button type="submit"> search</button>
+        </form>
+        <p id = "ass"></p>
+        <p id = "liab"></p>
+        <canvas></canvas>
+
+        <h1>Monte Carlo simulations</h1>
+        <form id="monteCarlo">
+            <p> Number of banks <input type="number" name="bankNum" min="1" max="1000"></p>
+            <p> Percentage of banks in core <input type="number" name="corePercent" min="0" max="1" step="0.1"></p>
+            <p> The ratio between the core-degree and periphery-degree <input type="number" name="degreeRatio" min="1" max="5" step="0.25"></p>
+            <p> Number of Monte Carlo simulations<input type = "number" name="iterations" min = "1" max = "1000"></p>
+            <button type="submit"> Generate graph </button>
+        </form>
+
+
+
+
+        <div id = 'myDiv'></div>
+        <script src = "network.js"></script>
+        <!-- <script>
+            let input = document.querySelector("#parameters");
+            input.addEventListener("submit", e => {
+                console.log(input.elements.degree);
+                e.preventDefault();
+
+            });
+        </script> -->
+
+
+
+
+    </body>
+</html>
