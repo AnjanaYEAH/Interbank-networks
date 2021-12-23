@@ -223,7 +223,7 @@ function actualDegree(allBanks){
 
 
 
-function dataGeneration(bankNum, iterations, corePercent, degreeRatio){
+async function dataGeneration(bankNum, iterations, corePercent, degreeRatio){
     let corePeripheryGlobalShockData = [];
     let corePeripheryCoreShockData = [];
     let erdosGlobalShockData = [];
@@ -232,7 +232,13 @@ function dataGeneration(bankNum, iterations, corePercent, degreeRatio){
     let allDegreesCoreShock = [];
     let allDegreesErdosShock = [];
 
-    for(let avg = 1; avg < 15; avg += 0.25){
+    let loading = document.querySelector("#loading");
+    loading.style.display = "";
+
+    let avg = 1;
+    async function dataGen(done){
+        loading.innerText = (avg/14.5) * 100 + "%";
+        avg += 0.5;
         let data = stats(avg, corePeriphery, bankNum, iterations, corePercent, degreeRatio, false)
         corePeripheryGlobalShockData.push(data[0]);
         allDegreesGlobalShock.push(data[1]);
@@ -243,17 +249,23 @@ function dataGeneration(bankNum, iterations, corePercent, degreeRatio){
 
         data = stats(avg, erdos, bankNum, iterations);
         erdosGlobalShockData.push(data[0]);
-        allDegreesErdosShock.push(data[1]); 
+        allDegreesErdosShock.push(data[1]);
+
+        if(avg < 15) return setTimeout(dataGen, 0, done);
+        done({
+            corePeripheryGlobalShockData,
+            corePeripheryCoreShockData,
+            erdosGlobalShockData,
+            allDegreesGlobalShock, 
+            allDegreesCoreShock, 
+            allDegreesErdosShock
+        });
     }
 
-    return {
-        corePeripheryGlobalShockData,
-        corePeripheryCoreShockData,
-        erdosGlobalShockData,
-        allDegreesGlobalShock, 
-        allDegreesCoreShock, 
-        allDegreesErdosShock
-    }
+    return new Promise((resolve) => {
+        dataGen(params => resolve(params));
+    });
+
 }
 
 
@@ -388,43 +400,45 @@ function userInput(){
             let iterations = Number(monteCarloForm.elements["iterations"].value);
             let degreeRatio = Number(monteCarloForm.elements["degreeRatio"].value);
             let corePercent = Number(monteCarloForm.elements["corePercent"].value);
-            let defaultData = dataGeneration(bankNum, iterations, corePercent, degreeRatio);
-            let corePeripheryGlobal = {
-                x: defaultData.allDegreesGlobalShock,
-                y: defaultData.corePeripheryGlobalShockData,
-                name: 'Core-Periphery network (random shock)',
-                mode: 'lines+markers',
-                type: 'scatter'
-            };
-            
-            let corePeripheryCore = {
-                x: defaultData.allDegreesCoreShock,
-                y: defaultData.corePeripheryCoreShockData,
-                name: 'Core-Periphery network (random shock to core)',
-                mode: 'lines+markers',
-                type: 'scatter'
-            };
-            
-            let erdosGlobal = {
-                x: defaultData.allDegreesErdosShock,
-                y: defaultData.erdosGlobalShockData,
-                name: 'Erdos network (random shock)',
-                mode: 'lines+markers',
-                type: 'scatter'
-            };
-            
-            let data = [corePeripheryGlobal, corePeripheryCore, erdosGlobal];
-
-            let layout = {
-                title: 'Graph showing the relationship between probaility of global cascade and degree of network',
-                xaxis: {
-                    title: 'Degree',
-                },
-                yaxis: {
-                    title: 'Probability of global cascade',
-                }
-            };
-            Plotly.newPlot('myDiv', data, layout);
+            dataGeneration(bankNum, iterations, corePercent, degreeRatio).then((defaultData) => {
+                console.log(defaultData);
+                let corePeripheryGlobal = {
+                    x: defaultData.allDegreesGlobalShock,
+                    y: defaultData.corePeripheryGlobalShockData,
+                    name: 'Core-Periphery network (random shock)',
+                    mode: 'lines+markers',
+                    type: 'scatter'
+                };
+                
+                let corePeripheryCore = {
+                    x: defaultData.allDegreesCoreShock,
+                    y: defaultData.corePeripheryCoreShockData,
+                    name: 'Core-Periphery network (random shock to core)',
+                    mode: 'lines+markers',
+                    type: 'scatter'
+                };
+                
+                let erdosGlobal = {
+                    x: defaultData.allDegreesErdosShock,
+                    y: defaultData.erdosGlobalShockData,
+                    name: 'Erdos network (random shock)',
+                    mode: 'lines+markers',
+                    type: 'scatter'
+                };
+                
+                let data = [corePeripheryGlobal, corePeripheryCore, erdosGlobal];
+    
+                let layout = {
+                    title: 'Graph showing the relationship between probaility of global cascade and degree of network',
+                    xaxis: {
+                        title: 'Degree',
+                    },
+                    yaxis: {
+                        title: 'Probability of global cascade',
+                    }
+                };
+                Plotly.newPlot('myDiv', data, layout);
+            });
         } 
     });
 }
